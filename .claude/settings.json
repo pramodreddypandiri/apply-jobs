@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls /Users/pramodreddypandiri/Desktop/Projects/apply-jobs/modes/_profile*)",
+      "Bash(npm run:*)",
+      "WebFetch(domain:jobs.ashbyhq.com)",
+      "WebFetch(domain:job-boards.greenhouse.io)",
+      "Bash(node /Users/pramodreddypandiri/Desktop/Projects/apply-jobs/doctor.mjs)",
+      "WebSearch"
+    ],
+    "additionalDirectories": [
+      "/tmp",
+      "/private/tmp"
+    ]
+  }
+}

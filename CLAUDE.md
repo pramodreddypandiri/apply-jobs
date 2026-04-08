@@ -1,3 +1,7 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 # Career-Ops -- AI Job Search Pipeline
 
 ## Origin
@@ -227,7 +231,7 @@ Default modes are in `modes/` (English). Additional language-specific modes are 
 **This system is designed for quality, not quantity.** The goal is to help the user find and apply to roles where there is a genuine match -- not to spam companies with mass applications.
 
 - **NEVER submit an application without the user reviewing it first.** Fill forms, draft answers, generate PDFs -- but always STOP before clicking Submit/Send/Apply. The user makes the final call.
-- **Strongly discourage low-fit applications.** If a score is below 4.0/5, explicitly recommend against applying. The user's time and the recruiter's time are both valuable. Only proceed if the user has a specific reason to override the score.
+- **Strongly discourage low-fit applications.** If a score is below 3.0/5, explicitly recommend against applying. The user's time and the recruiter's time are both valuable. Only proceed if the user has a specific reason to override the score.
 - **Quality over speed.** A well-targeted application to 5 companies beats a generic blast to 50. Guide the user toward fewer, better applications.
 - **Respect recruiters' time.** Every application a human reads costs someone's attention. Only send what's worth reading.
 
@@ -241,6 +245,78 @@ Default modes are in `modes/` (English). Additional language-specific modes are 
 3. Only footer/navbar without JD = closed. Title + description + Apply = active.
 
 **Exception for batch workers (`claude -p`):** Playwright is not available in headless pipe mode. Use WebFetch as fallback and mark the report header with `**Verification:** unconfirmed (batch mode)`. The user can verify manually later.
+
+---
+
+## Commands
+
+### Setup
+```bash
+npm install                        # Install dependencies (Playwright)
+npx playwright install chromium    # Required for PDF generation and scraping
+```
+
+### Diagnostics
+```bash
+npm run doctor                     # Validate prerequisites (Node, Playwright, required files)
+node check-liveness.mjs            # Check if pending pipeline URLs are still active
+node cv-sync-check.mjs             # Warn if cv.md is stale vs applications
+```
+
+### Pipeline Maintenance
+```bash
+npm run verify                     # Health check: report format, URLs, canonical statuses
+npm run normalize                  # Normalize status values to canonical set
+npm run dedup                      # Remove duplicate tracker entries
+npm run merge                      # Merge batch/tracker-additions/ TSVs into applications.md
+```
+
+### Testing
+```bash
+node test-all.mjs                  # Full test suite (syntax, scripts, data contract, leak check)
+node test-all.mjs --quick          # Skip Go dashboard build (faster)
+```
+
+### PDF Generation
+```bash
+npm run pdf                        # Generate PDF from output/cv-*.html via Playwright
+```
+
+### Greenhouse Auto-Apply
+```bash
+# Semi-auto: fills form, opens visible browser, user reviews and clicks Submit
+node greenhouse-apply.mjs "<url>" <pdf-path> --report=NNN --score=X.X
+
+# Full-auto: fills and submits (requires score >= auto_apply.min_score in config/profile.yml)
+node greenhouse-apply.mjs "<url>" <pdf-path> --mode=full --score=X.X
+
+# npm shorthand (pass args after --)
+npm run greenhouse -- "<url>" <pdf-path> --report=002 --score=4.7
+
+# Example — SoFi application
+node greenhouse-apply.mjs \
+  "https://job-boards.greenhouse.io/embed/job_app?for=sofi&token=7692745003" \
+  ./output/cv-pramod-sofi-2026-04-07.pdf \
+  --report=002 --score=4.7
+```
+
+**Auto-apply config** is in `config/profile.yml` under `auto_apply`:
+- `mode`: `semi` (default — fill + pause) or `full` (auto-submit)
+- `min_score`: minimum score to allow `full` mode (default `4.0`)
+- `default_answers`: pre-filled answers for standard form fields (work auth, salary, etc.)
+
+### Dashboard (Go TUI)
+```bash
+cd dashboard && go build           # Build terminal UI
+./career-dashboard                 # Run — browse, filter, sort pipeline interactively
+```
+
+### Updates
+```bash
+npm run update:check               # Check for system updates (non-destructive)
+npm run update                     # Apply update (never touches user data)
+npm run rollback                   # Revert last update
+```
 
 ---
 
